@@ -49,6 +49,9 @@ curl -X POST localhost:3000/reservas -H 'Content-Type: application/json' \
 1. **Concorrência.** Como vocês garantem que duas pessoas não ficam com a mesma poltrona? Onde estava o
    `await` perigoso?
 2. **OO.** O que o `Evento` esconde e por quê? Por que o `reservar` é tudo ou nada? Por que os erros são uma hierarquia de classes?
+   **Resposta:** O `Evento` esconde a lista de poltronas vendidas num campo privado (`#vendidas`). Quem está fora da classe só lê quantas poltronas restam, pelo `get disponivel`, e só muda a lista pelos métodos `reservar` e `liberar`, que conferem tudo antes. Assim ninguém consegue marcar uma poltrona sem passar pelas regras, nem "liberar" o evento inteiro por engano: tentar `evento.disponivel = 999` não muda nada.
+   O `reservar` é tudo ou nada porque uma família compra junta: se uma das poltronas do pedido já foi vendida, não faz sentido vender só as outras. Por isso ele confere todas as poltronas primeiro (se existem, se não se repetem, se estão livres) e só depois marca. Se der erro no meio, nenhuma fica presa.
+   Os erros são uma hierarquia porque todos são erros de negócio, mas cada um representa uma situação diferente e carrega o próprio `status` HTTP. O servidor só precisa saber que recebeu um `ErroDeNegocio` e responder com `erro.status`, sem um `if` para cada tipo de erro. Um erro novo é só mais uma classe filha.
 3. **Funcional.** O que ganhamos com `preco.ts` puro? Como vocês testariam ele sem subir o servidor?
 4. **Se fosse em outro paradigma.** Escolham uma das partes e expliquem como ficaria em outro
    paradigma, e se ficaria melhor ou pior.
